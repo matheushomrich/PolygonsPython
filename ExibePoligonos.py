@@ -147,10 +147,19 @@ def intersectionPoint(a1: Point, a2: Point, b1: Point, b2: Point):
 def uniao(polygon1: Polygon, polygon2: Polygon):
     intersectionsList = intersections(polygon1, polygon2)
     if(len(intersectionsList) > 0):
+        points = []
+        c = 0
         for e in intersectionsList:
-            a = intersectionPoint(e[0], e[1],e [2], e[3])
+            a = intersectionPoint(e[0], e[1],e [2], e[3])       #manda tupla para a função que calcula ponto da intersecao
+            points[c] = a
+            c+=1
     else:
         print("Union can't be made, there are no intersections between the polygons in the parameters")
+        return 0
+
+    #cria novo poligono
+    poligonoFinal: Polygon
+    poligonoFinal.Vertices = polygon1.Vertices + points + polygon2.Vertices
 
 # ***********************************************************************************
 # Programa Principal
