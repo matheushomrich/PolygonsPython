@@ -106,8 +106,8 @@ def display():
     glScalef(0.33, 0.5, 1)
     glLineWidth(2)
     glColor3f(1,0,0) # R, G, B  [0..1]
-    uniao(A, B)
-    Uniao.desenhaPoligono()
+    # uniao(A, B)
+    # Uniao.desenhaPoligono()
     glPopMatrix()
     
     # Desenha o polígono A no canto inferior esquerdo
@@ -116,6 +116,7 @@ def display():
     glScalef(0.33, 0.5, 1)
     glLineWidth(2)
     glColor3f(1,1,0) # R, G, B  [0..1]
+    Intersecao = interseccao(A, B)
     Intersecao.desenhaPoligono()
     glPopMatrix()
     
@@ -236,19 +237,61 @@ def init():
 # ***********************************************************************************
 # Programa Principal
 # ***********************************************************************************
-def  hasIntersection(p1, p2, p3, p4):
-    det = (p4.x - p3.x) * (p2.y - p1.y) - (p4.y - p3.y) * (p2.x -p1.x)
+# def  hasIntersection(p1, p2, p3, p4):
+#     det = (p4.x - p3.x) * (p2.y - p1.y) - (p4.y - p3.y) * (p2.x -p1.x)
     
-    #no intersection
+#     #no intersection
+#     if (det == 0.0):
+#         return False 
+
+#     s = ((p4.x - p3.x) * (p3.y - p1.y) - (p4.y - p3.y) * (p3.x - p1.x))/ det 
+#     t = ((p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x))/ det 
+
+#     #has intersection
+#     if((s > 0 and s < 1) and (t > 0 and t < 1) ):
+#         return True  
+
+s,t = 0, 0
+def hasIntersection(p1, p2, p3, p4):
+    ret = False
+    
+    ret = intersec2d( p1,  p2,  p3,  p4, s, t)
+    if (not ret): return False
+    if (s>=0.0 and s <=1.0 and t>=0.0 and t<=1.0):
+        return True
+    else: return False
+
+
+def intersec2d(p1, p2, p3, p4, s, t):
+    det = 0.0
+
+    det = (p4.x - p3.x) * (p2.y - p1.y)  -  (p4.y - p3.y) * (p2.x - p1.x)
+
     if (det == 0.0):
-        return False 
+        return False  # n�o h� intersec��o
 
-    s = ((p4.x - p3.x) * (p3.y - p1.y) - (p4.y - p3.y) * (p3.x - p1.x))/ det 
-    t = ((p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x))/ det 
+    s = ((p4.x - p3.x) * (p3.y - p1.y) - (p4.y - p3.y) * (p3.x - p1.x))/ det ;
+    t = ((p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x))/ det ;
 
-    #has intersection
-    if((s > 0 and s < 1) and (t > 0 and t < 1) ):
-        return True  
+    return True # h� intersec��o
+
+
+def intersectionPoint(a1: Point, a2: Point, b1: Point, b2: Point):
+
+    xdiff = (a1.x - a2.x, b1.x - b2.x)
+    ydiff = (a1.y - a2.y, b1.y - b2.y)
+
+    def det(a, b):
+        return a[0] * b[1] - a[1] * b[0]
+
+    div = det(xdiff, ydiff)
+    
+    d = (a1.x * a2.y - a1.y * a2.x, b1.x * b2.y - b1.y * b2.x)
+    
+    x = det(d, xdiff) / div
+    y = det(d, ydiff) / div
+
+    return x, y
 
 
 def intersections(polygon1: Polygon, polygon2: Polygon):
@@ -273,41 +316,86 @@ def intersections(polygon1: Polygon, polygon2: Polygon):
                 c+=1
     return intersectionsL
 
-def intersectionPoint(a1: Point, a2: Point, b1: Point, b2: Point):
 
-    xdiff = (a1.x - a2.x, b1.x - b2.x)
-    ydiff = (a1.y - a2.y, b1.y - b2.y)
 
-    def det(a, b):
-        return a[0] * b[1] - a[1] * b[0]
+def classificaArestas(polygon1: Polygon, polygon2: Polygon):
+    arestas = []
 
-    div = det(xdiff, ydiff)
+    isOut = True                                                #arestas FORA = True
+    for i in range(0, len(polygon1.Vertices)-2):
+        a = polygon1.Vertices[i]
+        b = polygon1.Vertices[i+1]
+        for j in range(0, len(polygon2.Vertices)-2):
+            c = polygon2.Vertices[j]
+            d = polygon2.Vertices[j+1]
+            if(hasIntersection(a, b, c, d)):
+                arestas.append((a, b, isOut))
+                isOut = not isOut
+        c = polygon2.Vertices[len(polygon2.Vertices)-1]
+        d = polygon2.Vertices[0]
+        if(hasIntersection(a, b, c, d)):
+                arestas.append((a, b, isOut))
+                isOut = not isOut
+    a = polygon1.Vertices[len(polygon1.Vertices)-1]
+    b = polygon1.Vertices[0]
+    for j in range(0, len(polygon2.Vertices)-2):
+        c = polygon2.Vertices[j]
+        d = polygon2.Vertices[j+1]
+        if(hasIntersection(a, b, c, d)):
+            arestas.append((a, b, isOut))
+            isOut = not isOut
+    c = polygon2.Vertices[len(polygon2.Vertices)-1]
+    d = polygon2.Vertices[0]
+    if(hasIntersection(a, b, c, d)):
+        arestas.append((a, b, isOut))
+        isOut = not isOut
+    return arestas
+
+
+# def uniao(polygon1: Polygon, polygon2: Polygon):
+#     #polygonFinal: Polygon
     
-    d = (a1.x * a2.y - a1.y * a2.x, b1.x * b2.y - b1.y * b2.x)
-    
-    x = det(d, xdiff) / div
-    y = det(d, ydiff) / div
-
-    return x, y
-
-
-
-def uniao(polygon1: Polygon, polygon2: Polygon):
-    #polygonFinal: Polygon
-    
-    intersectionsList = intersections(polygon1, polygon2)
-    if(len(intersectionsList) > 0):
-        for e in intersectionsList:
-            a = intersectionPoint(e[0], e[1],e[2], e[3])
-            Uniao.insereVertice(e[0][0], e[0][1], _)
-            Uniao.insereVertice(a[0], a[1], _)
-            Uniao.insereVertice(a[0], a[1], _)
-            Uniao.insereVertice(e[2][0], e[2][1],_)
+#     intersectionsList = intersections(polygon1, polygon2)
+#     if(len(intersectionsList) > 0):
+#         for e in intersectionsList:
+#             a = intersectionPoint(e[0], e[1],e[2], e[3])
+#             Uniao.insereVertice(e[0][0], e[0][1], _)
+#             Uniao.insereVertice(a[0], a[1], _)
+#             Uniao.insereVertice(a[0], a[1], _)
+#             Uniao.insereVertice(e[2][0], e[2][1],_)
             
             
-    else:
-        print("Union can't be made, there are no intersections between the polygons in the parameters")
+#     else:
+#         print("Union can't be made, there are no intersections between the polygons in the parameters")
 
+def interseccao(polygon1: Polygon, polygon2: Polygon):
+    arestas1 = classificaArestas(polygon1, polygon2)
+    arestas2 = classificaArestas(polygon2, polygon1)
+
+    intersectaux = []
+    for i in range(0, len(arestas1)):
+        if not arestas1[i][2]:
+            intersectaux.append(arestas1[i])
+    for i in range(0, len(arestas2)):
+        if not arestas2[i][2]:
+            intersectaux.append(arestas2[i])
+
+    intersectFinal = Polygon()
+    pInit = intersectaux[0][0]
+    pFinal = intersectaux[0][1]
+    intersectFinal.insereVertice(pInit.x, pInit.y, pInit.z)
+    intersectFinal.insereVertice(pFinal.x, pFinal.y, pFinal.z)
+    c=1
+    while pInit != pFinal:
+        if intersectaux[c][0] == pFinal:
+            pFinal = intersectaux[c][1]
+            if pInit != pFinal:
+                intersectFinal.insereVertice(pFinal.x, pFinal.y, pFinal.z)
+        c+=1
+        if c == len(intersectaux):
+            c=1
+
+    return intersectFinal
 
 
 
