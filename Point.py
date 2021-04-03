@@ -20,7 +20,11 @@ class Point:
         self.x = x
         self.y = y
         self.z = z
-
+    
+    def multiplica(self, x, y, z):
+        self.x *= x
+        self.y *= y
+        self.z *= z
 
 #P = Point()
 #P.set(1,2)
