@@ -1,2 +1,4 @@
 __pycache__/Point.cpython-38.pyc
 __pycache__/Poligonos.cpython-38.pyc
+__pycache__
+.gitignore.txt
