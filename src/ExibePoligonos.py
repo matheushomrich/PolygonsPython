@@ -202,9 +202,9 @@ def ObtemMinimo (P1, P2):
 def init():
     global Min, Max, Meio, Terco, Largura  # Variáveis usadas para definir os limites da Window
     
-    LePontosDeArquivo("Retangulo.txt", A)
+    LePontosDeArquivo("txts/Retangulo.txt", A)
     Min, Max = A.getLimits()
-    LePontosDeArquivo("Triangulo.txt", B)
+    LePontosDeArquivo("txts/Triangulo.txt", B)
     MinAux, MaxAux = B.getLimits()
     # Atualiza os limites globais após cada leitura
     Min = ObtemMinimo(Min, MinAux)
@@ -237,32 +237,20 @@ def init():
 # ***********************************************************************************
 # Programa Principal
 # ***********************************************************************************
-# def  hasIntersection(p1, p2, p3, p4):
-#     det = (p4.x - p3.x) * (p2.y - p1.y) - (p4.y - p3.y) * (p2.x -p1.x)
-    
-#     #no intersection
-#     if (det == 0.0):
-#         return False 
 
-#     s = ((p4.x - p3.x) * (p3.y - p1.y) - (p4.y - p3.y) * (p3.x - p1.x))/ det 
-#     t = ((p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x))/ det 
-
-#     #has intersection
-#     if((s > 0 and s < 1) and (t > 0 and t < 1) ):
-#         return True  
-
-s,t = 0, 0
+s,t = -1, -1
 def hasIntersection(p1, p2, p3, p4):
     ret = False
-    
-    ret = intersec2d( p1,  p2,  p3,  p4, s, t)
+    global s,t
+    s,t = -1, -1
+    ret = intersec2d( p1,  p2,  p3,  p4)
     if (not ret): return False
     if (s>=0.0 and s <=1.0 and t>=0.0 and t<=1.0):
         return True
     else: return False
 
 
-def intersec2d(p1, p2, p3, p4, s, t):
+def intersec2d(p1, p2, p3, p4):
     det = 0.0
 
     det = (p4.x - p3.x) * (p2.y - p1.y)  -  (p4.y - p3.y) * (p2.x - p1.x)
@@ -270,11 +258,11 @@ def intersec2d(p1, p2, p3, p4, s, t):
     if (det == 0.0):
         return False  # n�o h� intersec��o
 
-    s = ((p4.x - p3.x) * (p3.y - p1.y) - (p4.y - p3.y) * (p3.x - p1.x))/ det ;
-    t = ((p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x))/ det ;
+    global s, t
+    s = ((p4.x - p3.x) * (p3.y - p1.y) - (p4.y - p3.y) * (p3.x - p1.x))/ det
+    t = ((p2.x - p1.x) * (p3.y - p1.y) - (p2.y - p1.y) * (p3.x - p1.x))/ det
 
     return True # h� intersec��o
-
 
 def intersectionPoint(a1: Point, a2: Point, b1: Point, b2: Point):
 
@@ -290,8 +278,9 @@ def intersectionPoint(a1: Point, a2: Point, b1: Point, b2: Point):
     
     x = det(d, xdiff) / div
     y = det(d, ydiff) / div
-
-    return x, y
+    intersecP = Point()
+    intersecP.set(x,y,0)
+    return intersecP
 
 
 def intersections(polygon1: Polygon, polygon2: Polygon):
@@ -322,33 +311,45 @@ def classificaArestas(polygon1: Polygon, polygon2: Polygon):
     arestas = []
 
     isOut = True                                                #arestas FORA = True
-    for i in range(0, len(polygon1.Vertices)-2):
+    for i in range(0, len(polygon1.Vertices)-1):
         a = polygon1.Vertices[i]
         b = polygon1.Vertices[i+1]
-        for j in range(0, len(polygon2.Vertices)-2):
+        for j in range(0, len(polygon2.Vertices)-1):
             c = polygon2.Vertices[j]
             d = polygon2.Vertices[j+1]
             if(hasIntersection(a, b, c, d)):
-                arestas.append((a, b, isOut))
+                arestas.append((a, intersectionPoint(a, b, c, d), isOut))
                 isOut = not isOut
+                arestas.append((intersectionPoint(a, b, c, d), b, isOut))
+            else:
+                arestas.append(a, b, isOut)
         c = polygon2.Vertices[len(polygon2.Vertices)-1]
         d = polygon2.Vertices[0]
         if(hasIntersection(a, b, c, d)):
-                arestas.append((a, b, isOut))
+                arestas.append((a, intersectionPoint(a, b, c, d), isOut))
                 isOut = not isOut
+                arestas.append((intersectionPoint(a, b, c, d), b, isOut))
+        else:
+            arestas.append(a, b, isOut)
     a = polygon1.Vertices[len(polygon1.Vertices)-1]
     b = polygon1.Vertices[0]
-    for j in range(0, len(polygon2.Vertices)-2):
+    for j in range(0, len(polygon2.Vertices)-1):
         c = polygon2.Vertices[j]
         d = polygon2.Vertices[j+1]
         if(hasIntersection(a, b, c, d)):
-            arestas.append((a, b, isOut))
+            arestas.append((a, intersectionPoint(a, b, c, d), isOut))
             isOut = not isOut
+            arestas.append((intersectionPoint(a, b, c, d), b, isOut))
+        else:
+            arestas.append(a, b, isOut)
     c = polygon2.Vertices[len(polygon2.Vertices)-1]
     d = polygon2.Vertices[0]
     if(hasIntersection(a, b, c, d)):
-        arestas.append((a, b, isOut))
+        arestas.append((a, intersectionPoint(a, b, c, d), isOut))
         isOut = not isOut
+        arestas.append((intersectionPoint(a, b, c, d), b, isOut))
+    else:
+        arestas.append(a, b, isOut)
     return arestas
 
 
