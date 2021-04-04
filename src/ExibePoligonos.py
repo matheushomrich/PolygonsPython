@@ -306,14 +306,17 @@ def intersections(polygon1: Polygon, polygon2: Polygon):
     return intersectionsL
 
 
-
+#nota pra próxima tentativa:
+#ao invéz de add mais pontos em polygon.vertices, testar intersectionPoint das novas arestas com o c, d, ou com outras arestas
+#separar novamente e add as novas arestas, se tiver 
+#Talvez criar uma def separada pra isso
 def classificaArestas(polygon1: Polygon, polygon2: Polygon):
     arestas = []
-
     isOut = True                                                #arestas FORA = True
     for i in range(0, len(polygon1.Vertices)-1):
         a = polygon1.Vertices[i]
         b = polygon1.Vertices[i+1]
+        add = True
         for j in range(0, len(polygon2.Vertices)-1):
             c = polygon2.Vertices[j]
             d = polygon2.Vertices[j+1]
@@ -321,18 +324,19 @@ def classificaArestas(polygon1: Polygon, polygon2: Polygon):
                 arestas.append((a, intersectionPoint(a, b, c, d), isOut))
                 isOut = not isOut
                 arestas.append((intersectionPoint(a, b, c, d), b, isOut))
-            else:
-                arestas.append(a, b, isOut)
+                add = False
         c = polygon2.Vertices[len(polygon2.Vertices)-1]
         d = polygon2.Vertices[0]
         if(hasIntersection(a, b, c, d)):
                 arestas.append((a, intersectionPoint(a, b, c, d), isOut))
                 isOut = not isOut
                 arestas.append((intersectionPoint(a, b, c, d), b, isOut))
-        else:
-            arestas.append(a, b, isOut)
+                add = False
+        if(add):
+            arestas.append((a, b, isOut))
     a = polygon1.Vertices[len(polygon1.Vertices)-1]
     b = polygon1.Vertices[0]
+    add = True
     for j in range(0, len(polygon2.Vertices)-1):
         c = polygon2.Vertices[j]
         d = polygon2.Vertices[j+1]
@@ -340,16 +344,16 @@ def classificaArestas(polygon1: Polygon, polygon2: Polygon):
             arestas.append((a, intersectionPoint(a, b, c, d), isOut))
             isOut = not isOut
             arestas.append((intersectionPoint(a, b, c, d), b, isOut))
-        else:
-            arestas.append(a, b, isOut)
+            add = False
     c = polygon2.Vertices[len(polygon2.Vertices)-1]
     d = polygon2.Vertices[0]
     if(hasIntersection(a, b, c, d)):
         arestas.append((a, intersectionPoint(a, b, c, d), isOut))
         isOut = not isOut
         arestas.append((intersectionPoint(a, b, c, d), b, isOut))
-    else:
-        arestas.append(a, b, isOut)
+        add = False
+    if(add):
+        arestas.append((a, b, isOut))
     return arestas
 
 
