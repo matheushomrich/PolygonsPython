@@ -305,6 +305,42 @@ def intersections(polygon1: Polygon, polygon2: Polygon):
                 c+=1
     return intersectionsL
 
+isOut = True
+vAuxAdd = False
+def auxArestas(aresta, c, d, polygon):
+    global isOut
+    auxArestasV = []
+    global vAuxAdd
+    vAuxAdd = False
+    for j in range(0, len(polygon.Vertices)-1):
+            ca = polygon.Vertices[j]
+            da = polygon.Vertices[j+1]
+            if((not (ca==c and da==d)) and hasIntersection(aresta[0], aresta[1], ca, da)):
+                ip = intersectionPoint(aresta[0], aresta[1], ca, da)
+                auxArestasV.append((aresta[0], ip, isOut))
+                isOut = not isOut
+                auxArestasVetor = auxArestas((ip, aresta[1], isOut),ca,da,polygon)
+                if(vAuxAdd): #talvez tenha q fazer for
+                    for i in auxArestasVetor:
+                        auxArestasV.append(i)
+                else:
+                    auxArestasV.append((ip, aresta[1], isOut))
+                vAuxAdd = True
+                
+    ca = polygon.Vertices[len(polygon.Vertices)-1]
+    da = polygon.Vertices[0]
+    if((not (ca==c and da==d)) and hasIntersection(aresta[0], aresta[1], ca, da)):
+        ip = intersectionPoint(aresta[0], aresta[1], ca, da)
+        auxArestasV.append((aresta[0], ip, isOut))
+        isOut = not isOut
+        auxArestasVetor = auxArestas((ip, aresta[1], isOut),ca,da,polygon)
+        if(vAuxAdd): #talvez tenha q fazer for
+            for i in auxArestasVetor:
+                auxArestasV.append(i)
+        else:
+            auxArestasV.append((ip, aresta[1], isOut))
+        vAuxAdd = True
+    return auxArestasV
 
 #nota pra próxima tentativa:
 #ao invéz de add mais pontos em polygon.vertices, testar intersectionPoint das novas arestas com o c, d, ou com outras arestas
@@ -312,7 +348,9 @@ def intersections(polygon1: Polygon, polygon2: Polygon):
 #Talvez criar uma def separada pra isso
 def classificaArestas(polygon1: Polygon, polygon2: Polygon):
     arestas = []
-    isOut = True                                                #arestas FORA = True
+    global vAuxAdd
+    global isOut    
+    isOut = True                                          #arestas FORA = True
     for i in range(0, len(polygon1.Vertices)-1):
         a = polygon1.Vertices[i]
         b = polygon1.Vertices[i+1]
@@ -320,17 +358,29 @@ def classificaArestas(polygon1: Polygon, polygon2: Polygon):
         for j in range(0, len(polygon2.Vertices)-1):
             c = polygon2.Vertices[j]
             d = polygon2.Vertices[j+1]
-            if(hasIntersection(a, b, c, d)):
-                arestas.append((a, intersectionPoint(a, b, c, d), isOut))
+            if(hasIntersection(a, b, c, d) and add):
+                ip = intersectionPoint(a, b, c, d)
+                arestas.append((a, ip, isOut))
                 isOut = not isOut
-                arestas.append((intersectionPoint(a, b, c, d), b, isOut))
+                auxArestasVetor = auxArestas((ip, b, isOut),c,d,polygon2)
+                if(vAuxAdd): #talvez tenha q fazer for
+                    for i in auxArestasVetor:
+                        arestas.append(i)
+                else:
+                    arestas.append((ip, b, isOut))
                 add = False
         c = polygon2.Vertices[len(polygon2.Vertices)-1]
         d = polygon2.Vertices[0]
-        if(hasIntersection(a, b, c, d)):
-                arestas.append((a, intersectionPoint(a, b, c, d), isOut))
+        if(hasIntersection(a, b, c, d) and add):
+                ip = intersectionPoint(a, b, c, d)
+                arestas.append((a, ip, isOut))
                 isOut = not isOut
-                arestas.append((intersectionPoint(a, b, c, d), b, isOut))
+                auxArestasVetor = auxArestas((ip, b, isOut),c,d,polygon2)
+                if(vAuxAdd): #talvez tenha q fazer for
+                    for i in auxArestasVetor:
+                        arestas.append(i)
+                else:
+                    arestas.append((ip, b, isOut))
                 add = False
         if(add):
             arestas.append((a, b, isOut))
@@ -340,17 +390,29 @@ def classificaArestas(polygon1: Polygon, polygon2: Polygon):
     for j in range(0, len(polygon2.Vertices)-1):
         c = polygon2.Vertices[j]
         d = polygon2.Vertices[j+1]
-        if(hasIntersection(a, b, c, d)):
-            arestas.append((a, intersectionPoint(a, b, c, d), isOut))
+        if(hasIntersection(a, b, c, d) and add):
+            ip = intersectionPoint(a, b, c, d)
+            arestas.append((a, ip, isOut))
             isOut = not isOut
-            arestas.append((intersectionPoint(a, b, c, d), b, isOut))
+            auxArestasVetor = auxArestas((ip, b, isOut),c,d,polygon2)
+            if(vAuxAdd): #talvez tenha q fazer for
+                for i in auxArestasVetor:
+                    arestas.append(i)
+            else:
+                arestas.append((ip, b, isOut))
             add = False
     c = polygon2.Vertices[len(polygon2.Vertices)-1]
     d = polygon2.Vertices[0]
-    if(hasIntersection(a, b, c, d)):
-        arestas.append((a, intersectionPoint(a, b, c, d), isOut))
+    if(hasIntersection(a, b, c, d) and add):
+        ip = intersectionPoint(a, b, c, d)
+        arestas.append((a, ip, isOut))
         isOut = not isOut
-        arestas.append((intersectionPoint(a, b, c, d), b, isOut))
+        auxArestasVetor = auxArestas((ip, b, isOut),c,d,polygon2)
+        if(vAuxAdd): #talvez tenha q fazer for
+            for i in auxArestasVetor:
+                arestas.append(i)
+        else:
+            arestas.append((ip, b, isOut))
         add = False
     if(add):
         arestas.append((a, b, isOut))
@@ -379,7 +441,7 @@ def interseccao(polygon1: Polygon, polygon2: Polygon):
 
     intersectaux = []
     for i in range(0, len(arestas1)):
-        if not arestas1[i][2]:
+        if arestas1[i][2]:
             intersectaux.append(arestas1[i])
     for i in range(0, len(arestas2)):
         if not arestas2[i][2]:
@@ -392,9 +454,9 @@ def interseccao(polygon1: Polygon, polygon2: Polygon):
     intersectFinal.insereVertice(pFinal.x, pFinal.y, pFinal.z)
     c=1
     while pInit != pFinal:
-        if intersectaux[c][0] == pFinal:
+        if((intersectaux[c][0].x == pFinal.x) and (intersectaux[c][0].y == pFinal.y)):
             pFinal = intersectaux[c][1]
-            if pInit != pFinal:
+            if (not ((pInit.x == pFinal.x) and (pInit.y == pFinal.y))):
                 intersectFinal.insereVertice(pFinal.x, pFinal.y, pFinal.z)
         c+=1
         if c == len(intersectaux):
@@ -407,8 +469,6 @@ def interseccao(polygon1: Polygon, polygon2: Polygon):
 # ***********************************************************************************
 # Programa Principal
 # ***********************************************************************************
-
-
 
 
 init()
