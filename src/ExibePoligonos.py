@@ -126,8 +126,18 @@ def display():
     glScalef(0.33, 0.5, 1)
     glLineWidth(2)
     glColor3f(1,0,0) # R, G, B  [0..1]
-    Diferenca = diferenca(A, B)
-    Diferenca.desenhaPoligono()
+    Diferencaa = diferenca(A, B)
+    Diferencaa.desenhaPoligono()
+    glPopMatrix()
+
+    # Desenha o polígono B no meio, abaixo
+    glPushMatrix()
+    glTranslatef(Terco.x*2, 0, 0)
+    glScalef(0.33, 0.5, 1)
+    glLineWidth(2)
+    glColor3f(1,0,0) # R, G, B  [0..1]
+    # Diferencab = diferenca(B, A)
+    # Diferencab.desenhaPoligono()
     glPopMatrix()
 
     glutSwapBuffers()
@@ -203,9 +213,9 @@ def ObtemMinimo (P1, P2):
 def init():
     global Min, Max, Meio, Terco, Largura  # Variáveis usadas para definir os limites da Window
     
-    LePontosDeArquivo("txts/Retangulo.txt", A)
+    LePontosDeArquivo("txts/PoligonoDeTeste.txt", A)
     Min, Max = A.getLimits()
-    LePontosDeArquivo("txts/Triangulo.txt", B)
+    LePontosDeArquivo("txts/PoligonoDeTeste2.txt", B)
     MinAux, MaxAux = B.getLimits()
     # Atualiza os limites globais após cada leitura
     Min = ObtemMinimo(Min, MinAux)
@@ -508,7 +518,7 @@ def diferenca(polygon1: Polygon, polygon2: Polygon):
     diffFinal.insereVertice(pFinal.x, pFinal.y, pFinal.z)
     c=1
 
-    while not pInit.isEqual(pFinal):
+    while (len(diffAux)!=len(diffFinal.Vertices)):
         if((diffAux[c][0].x == pFinal.x) and (diffAux[c][0].y == pFinal.y)):
             pFinal = diffAux[c][1]
             if not pInit.isEqual(pFinal):
