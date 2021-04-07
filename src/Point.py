@@ -25,6 +25,12 @@ class Point:
         self.x *= x
         self.y *= y
         self.z *= z
+    
+    def isEqual(self, a):
+        if self.x == a.x and self.y == a.y:
+            return True
+        else:
+            return False
 
 #P = Point()
 #P.set(1,2)

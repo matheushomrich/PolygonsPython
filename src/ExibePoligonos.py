@@ -106,8 +106,8 @@ def display():
     glScalef(0.33, 0.5, 1)
     glLineWidth(2)
     glColor3f(1,0,0) # R, G, B  [0..1]
-    # uniao(A, B)
-    # Uniao.desenhaPoligono()
+    Uniao = uniao(A, B)
+    Uniao.desenhaPoligono()
     glPopMatrix()
     
     # Desenha o polígono A no canto inferior esquerdo
@@ -126,6 +126,7 @@ def display():
     glScalef(0.33, 0.5, 1)
     glLineWidth(2)
     glColor3f(1,0,0) # R, G, B  [0..1]
+    Diferenca = diferenca(A, B)
     Diferenca.desenhaPoligono()
     glPopMatrix()
 
@@ -342,15 +343,25 @@ def auxArestas(aresta, c, d, polygon):
         vAuxAdd = True
     return auxArestasV
 
-#nota pra próxima tentativa:
-#ao invéz de add mais pontos em polygon.vertices, testar intersectionPoint das novas arestas com o c, d, ou com outras arestas
-#separar novamente e add as novas arestas, se tiver 
-#Talvez criar uma def separada pra isso
+# usar essa implementacao de for pro classificaAresta se houver tempo
+def isInside(poly: Polygon, point: Point):
+    i= 0
+    j = len(poly.Vertices) - 1
+    inside = False
+    while i < len(poly.Vertices):
+        if(((poly.Vertices[i].y > point.y) != (poly.Vertices[j].y > point.y)) 
+        and (point.x < (poly.Vertices[j].x - poly.Vertices[i].x) * (point.y - poly.Vertices[i].y) / (poly.Vertices[j].y-poly.Vertices[i].y) + poly.Vertices[i].x)):
+            inside = not inside
+        j = i
+        i = i + 1
+         
+    return inside
+
 def classificaArestas(polygon1: Polygon, polygon2: Polygon):
     arestas = []
     global vAuxAdd
     global isOut    
-    isOut = True                                          #arestas FORA = True
+    isOut = not isInside(polygon2, polygon1.Vertices[0])                                          #arestas FORA = True
     for i in range(0, len(polygon1.Vertices)-1):
         a = polygon1.Vertices[i]
         b = polygon1.Vertices[i+1]
@@ -392,9 +403,9 @@ def classificaArestas(polygon1: Polygon, polygon2: Polygon):
         d = polygon2.Vertices[j+1]
         if(hasIntersection(a, b, c, d) and add):
             ip = intersectionPoint(a, b, c, d)
-            arestas.append((a, ip, isOut))
+            arestas.append((ip, b, isOut))
             isOut = not isOut
-            auxArestasVetor = auxArestas((ip, b, isOut),c,d,polygon2)
+            auxArestasVetor = auxArestas((a, ip, isOut), c, d, polygon2)
             if(vAuxAdd): #talvez tenha q fazer for
                 for i in auxArestasVetor:
                     arestas.append(i)
@@ -405,9 +416,9 @@ def classificaArestas(polygon1: Polygon, polygon2: Polygon):
     d = polygon2.Vertices[0]
     if(hasIntersection(a, b, c, d) and add):
         ip = intersectionPoint(a, b, c, d)
-        arestas.append((a, ip, isOut))
+        arestas.append((ip, b, isOut))
         isOut = not isOut
-        auxArestasVetor = auxArestas((ip, b, isOut),c,d,polygon2)
+        auxArestasVetor = auxArestas((a, ip, isOut), c, d, polygon2)
         if(vAuxAdd): #talvez tenha q fazer for
             for i in auxArestasVetor:
                 arestas.append(i)
@@ -419,21 +430,35 @@ def classificaArestas(polygon1: Polygon, polygon2: Polygon):
     return arestas
 
 
-# def uniao(polygon1: Polygon, polygon2: Polygon):
-#     #polygonFinal: Polygon
-    
-#     intersectionsList = intersections(polygon1, polygon2)
-#     if(len(intersectionsList) > 0):
-#         for e in intersectionsList:
-#             a = intersectionPoint(e[0], e[1],e[2], e[3])
-#             Uniao.insereVertice(e[0][0], e[0][1], _)
-#             Uniao.insereVertice(a[0], a[1], _)
-#             Uniao.insereVertice(a[0], a[1], _)
-#             Uniao.insereVertice(e[2][0], e[2][1],_)
-            
-            
-#     else:
-#         print("Union can't be made, there are no intersections between the polygons in the parameters")
+def uniao(polygon1: Polygon, polygon2: Polygon):
+    arestas1 = classificaArestas(polygon1, polygon2)
+    arestas2 = classificaArestas(polygon2, polygon1)
+
+    uniaoAux = []
+    for i in range(0, len(arestas1)):
+        if arestas1[i][2]:
+            uniaoAux.append(arestas1[i])
+    for i in range(0, len(arestas2)):
+        if arestas2[i][2]:
+            uniaoAux.append(arestas2[i])
+
+    uniaoFinal = Polygon()
+    pInit = uniaoAux[0][0]
+    pFinal = uniaoAux[0][1]
+    uniaoFinal.insereVertice(pInit.x, pInit.y, pInit.z)
+    uniaoFinal.insereVertice(pFinal.x, pFinal.y, pFinal.z)
+    c=1
+
+    while not pInit.isEqual(pFinal):
+        if((uniaoAux[c][0].x == pFinal.x) and (uniaoAux[c][0].y == pFinal.y)):
+            pFinal = uniaoAux[c][1]
+            if not pInit.isEqual(pFinal):
+                uniaoFinal.insereVertice(pFinal.x, pFinal.y, pFinal.z)
+        c += 1
+        if c == len(uniaoAux):
+            c = 1
+
+    return uniaoFinal
 
 def interseccao(polygon1: Polygon, polygon2: Polygon):
     arestas1 = classificaArestas(polygon1, polygon2)
@@ -441,7 +466,7 @@ def interseccao(polygon1: Polygon, polygon2: Polygon):
 
     intersectaux = []
     for i in range(0, len(arestas1)):
-        if arestas1[i][2]:
+        if not arestas1[i][2]:
             intersectaux.append(arestas1[i])
     for i in range(0, len(arestas2)):
         if not arestas2[i][2]:
@@ -453,10 +478,10 @@ def interseccao(polygon1: Polygon, polygon2: Polygon):
     intersectFinal.insereVertice(pInit.x, pInit.y, pInit.z)
     intersectFinal.insereVertice(pFinal.x, pFinal.y, pFinal.z)
     c=1
-    while pInit != pFinal:
+    while not pInit.isEqual(pFinal):
         if((intersectaux[c][0].x == pFinal.x) and (intersectaux[c][0].y == pFinal.y)):
             pFinal = intersectaux[c][1]
-            if (not ((pInit.x == pFinal.x) and (pInit.y == pFinal.y))):
+            if not pInit.isEqual(pFinal):
                 intersectFinal.insereVertice(pFinal.x, pFinal.y, pFinal.z)
         c+=1
         if c == len(intersectaux):
@@ -464,7 +489,35 @@ def interseccao(polygon1: Polygon, polygon2: Polygon):
 
     return intersectFinal
 
+def diferenca(polygon1: Polygon, polygon2: Polygon):
+    arestas1 = classificaArestas(polygon1, polygon2)
+    arestas2 = classificaArestas(polygon2, polygon1)
 
+    diffAux = []
+    for i in range(0, len(arestas1)):
+        if arestas1[i][2]:
+            diffAux.append(arestas1[i])
+    for i in range(0, len(arestas2)):
+        if not arestas2[i][2]:
+            diffAux.append(arestas2[i])
+
+    diffFinal = Polygon()
+    pInit = diffAux[0][0]
+    pFinal = diffAux[0][1]
+    diffFinal.insereVertice(pInit.x, pInit.y, pInit.z)
+    diffFinal.insereVertice(pFinal.x, pFinal.y, pFinal.z)
+    c=1
+
+    while not pInit.isEqual(pFinal):
+        if((diffAux[c][0].x == pFinal.x) and (diffAux[c][0].y == pFinal.y)):
+            pFinal = diffAux[c][1]
+            if not pInit.isEqual(pFinal):
+                diffFinal.insereVertice(pFinal.x, pFinal.y, pFinal.z)
+        c += 1
+        if c == len(diffAux):
+            c = 1
+
+    return diffFinal
 
 # ***********************************************************************************
 # Programa Principal
