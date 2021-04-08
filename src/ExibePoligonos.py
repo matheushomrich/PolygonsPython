@@ -136,8 +136,8 @@ def display():
     glScalef(0.33, 0.5, 1)
     glLineWidth(2)
     glColor3f(1,0,0) # R, G, B  [0..1]
-    # Diferencab = diferenca(B, A)
-    # Diferencab.desenhaPoligono()
+    Diferencab = diferenca2(B, A)
+    Diferencab.desenhaPoligono()
     glPopMatrix()
 
     glutSwapBuffers()
@@ -213,9 +213,9 @@ def ObtemMinimo (P1, P2):
 def init():
     global Min, Max, Meio, Terco, Largura  # Variáveis usadas para definir os limites da Window
     
-    LePontosDeArquivo("txts/PoligonoDeTeste.txt", A)
+    LePontosDeArquivo("txts/Retangulo.txt", A)
     Min, Max = A.getLimits()
-    LePontosDeArquivo("txts/PoligonoDeTeste2.txt", B)
+    LePontosDeArquivo("txts/Triangulo.txt", B)
     MinAux, MaxAux = B.getLimits()
     # Atualiza os limites globais após cada leitura
     Min = ObtemMinimo(Min, MinAux)
@@ -323,7 +323,7 @@ def auxArestas(aresta, c, d, polygon):
     auxArestasV = []
     global vAuxAdd
     vAuxAdd = False
-    for j in range(0, len(polygon.Vertices)-1):
+    for j in range(0, len(polygon.Vertices) - 1):
             ca = polygon.Vertices[j]
             da = polygon.Vertices[j+1]
             if((not (ca==c and da==d)) and hasIntersection(aresta[0], aresta[1], ca, da)):
@@ -372,25 +372,25 @@ def classificaArestas(polygon1: Polygon, polygon2: Polygon):
     global vAuxAdd
     global isOut    
     isOut = not isInside(polygon2, polygon1.Vertices[0])                                          #arestas FORA = True
-    for i in range(0, len(polygon1.Vertices)-1):
+    for i in range(0, len(polygon1.Vertices) - 1):
         a = polygon1.Vertices[i]
-        b = polygon1.Vertices[i+1]
+        b = polygon1.Vertices[i + 1]
         add = True
-        for j in range(0, len(polygon2.Vertices)-1):
+        for j in range(0, len(polygon2.Vertices) - 1):
             c = polygon2.Vertices[j]
-            d = polygon2.Vertices[j+1]
+            d = polygon2.Vertices[j + 1]
             if(hasIntersection(a, b, c, d) and add):
                 ip = intersectionPoint(a, b, c, d)
                 arestas.append((a, ip, isOut))
                 isOut = not isOut
-                auxArestasVetor = auxArestas((ip, b, isOut),c,d,polygon2)
+                auxArestasVetor = auxArestas((ip, b, isOut), c , d, polygon2)
                 if(vAuxAdd): #talvez tenha q fazer for
                     for i in auxArestasVetor:
                         arestas.append(i)
                 else:
                     arestas.append((ip, b, isOut))
                 add = False
-        c = polygon2.Vertices[len(polygon2.Vertices)-1]
+        c = polygon2.Vertices[len(polygon2.Vertices) - 1]
         d = polygon2.Vertices[0]
         if(hasIntersection(a, b, c, d) and add):
                 ip = intersectionPoint(a, b, c, d)
@@ -405,10 +405,10 @@ def classificaArestas(polygon1: Polygon, polygon2: Polygon):
                 add = False
         if(add):
             arestas.append((a, b, isOut))
-    a = polygon1.Vertices[len(polygon1.Vertices)-1]
+    a = polygon1.Vertices[len(polygon1.Vertices) - 1]
     b = polygon1.Vertices[0]
     add = True
-    for j in range(0, len(polygon2.Vertices)-1):
+    for j in range(0, len(polygon2.Vertices) - 1):
         c = polygon2.Vertices[j]
         d = polygon2.Vertices[j+1]
         if(hasIntersection(a, b, c, d) and add):
@@ -422,7 +422,7 @@ def classificaArestas(polygon1: Polygon, polygon2: Polygon):
             else:
                 arestas.append((ip, b, isOut))
             add = False
-    c = polygon2.Vertices[len(polygon2.Vertices)-1]
+    c = polygon2.Vertices[len(polygon2.Vertices) - 1]
     d = polygon2.Vertices[0]
     if(hasIntersection(a, b, c, d) and add):
         ip = intersectionPoint(a, b, c, d)
@@ -493,9 +493,9 @@ def interseccao(polygon1: Polygon, polygon2: Polygon):
             pFinal = intersectaux[c][1]
             if not pInit.isEqual(pFinal):
                 intersectFinal.insereVertice(pFinal.x, pFinal.y, pFinal.z)
-        c+=1
+        c += 1
         if c == len(intersectaux):
-            c=1
+            c = 1
 
     return intersectFinal
 
@@ -516,9 +516,9 @@ def diferenca(polygon1: Polygon, polygon2: Polygon):
     pFinal = diffAux[0][1]
     diffFinal.insereVertice(pInit.x, pInit.y, pInit.z)
     diffFinal.insereVertice(pFinal.x, pFinal.y, pFinal.z)
-    c=1
+    c = 1
 
-    while (len(diffAux)!=len(diffFinal.Vertices)):
+    while (len(diffAux) != len(diffFinal.Vertices)):
         if((diffAux[c][0].x == pFinal.x) and (diffAux[c][0].y == pFinal.y)):
             pFinal = diffAux[c][1]
             if not pInit.isEqual(pFinal):
@@ -526,6 +526,55 @@ def diferenca(polygon1: Polygon, polygon2: Polygon):
         c += 1
         if c == len(diffAux):
             c = 1
+
+    return diffFinal
+
+def diferenca2(polygon1: Polygon, polygon2: Polygon):
+    arestas1 = classificaArestas(polygon1, polygon2)
+    arestas2 = classificaArestas(polygon2, polygon1)
+
+    diffAux = []
+    for i in range(0, len(arestas1)):
+        if arestas1[i][2]:
+            diffAux.append(arestas1[i])
+    for i in range(0, len(arestas2)):
+        if not arestas2[i][2]:
+            diffAux.append(arestas2[i])
+
+    diffFinal = Polygon()
+    pInit = diffAux[0][0]
+    pFinal = diffAux[0][1]
+    diffFinal.insereVertice(pInit.x, pInit.y, pInit.z)
+    diffFinal.insereVertice(pFinal.x, pFinal.y, pFinal.z)
+    c = 1
+    c2 = 0
+    test = False
+    
+    sizeAux = len(diffAux)
+
+    while (sizeAux != len(diffFinal.Vertices)):
+        if((diffAux[c][0].x == pFinal.x) and (diffAux[c][0].y == pFinal.y)):
+            pFinal = diffAux[c][1]
+            if not pInit.isEqual(pFinal):
+                diffFinal.insereVertice(pFinal.x, pFinal.y, pFinal.z)
+                diffAux.pop(c)
+        ##c += 1
+        
+        if test:
+            if((diffAux[c][1].x == pFinal.x) and (diffAux[c][1].y == pFinal.y)):
+                pFinal = diffAux[c][0]
+                if not pInit.isEqual(pFinal):
+                    diffFinal.insereVertice(pFinal.x, pFinal.y, pFinal.z)
+                    diffAux.pop(c)
+        
+        c += 1
+        if c >= len(diffAux):
+            c = 1
+            c2 += 1
+            if c2 == 2:
+                test = not test
+        
+        
 
     return diffFinal
 
