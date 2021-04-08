@@ -215,7 +215,7 @@ def init():
     
     LePontosDeArquivo("txts/Retangulo.txt", A)
     Min, Max = A.getLimits()
-    LePontosDeArquivo("txts/Triangulo.txt", B)
+    LePontosDeArquivo("txts/Quadrado.txt", B)
     MinAux, MaxAux = B.getLimits()
     # Atualiza os limites globais após cada leitura
     Min = ObtemMinimo(Min, MinAux)
@@ -297,22 +297,22 @@ def intersectionPoint(a1: Point, a2: Point, b1: Point, b2: Point):
 def intersections(polygon1: Polygon, polygon2: Polygon):
     intersectionsL = []
     c = 0
-    for i in range(0, len(polygon1.Vertices)-2):
-        for j in range(0, len(polygon2.Vertices)-2):
-            if(hasIntersection(polygon1.Vertices[i], polygon1.Vertices[i+1], polygon2.Vertices[j], polygon2.Vertices[j+1])):        #verifica intersecao com todas arestas exceto ultimoponto - primeiroponto do poligono2
-                intersectionsL[c] = (polygon1.Vertices[i], polygon1.Vertices[i+1], polygon2.Vertices[j], polygon2.Vertices[j+1])
+    for i in range(0, len(polygon1.Vertices) - 2):
+        for j in range(0, len(polygon2.Vertices) - 2):
+            if(hasIntersection(polygon1.Vertices[i], polygon1.Vertices[i + 1], polygon2.Vertices[j], polygon2.Vertices[j + 1])):        #verifica intersecao com todas arestas exceto ultimoponto - primeiroponto do poligono2
+                intersectionsL[c] = (polygon1.Vertices[i], polygon1.Vertices[i + 1], polygon2.Vertices[j], polygon2.Vertices[j + 1])
                 c+=1
-        if(hasIntersection(polygon1.Vertices[i],polygon1.Vertices[i+1], polygon2.Vertices[len(polygon2.Vertices)-1], polygon2.Vertices[0])):        # verifica apenas ultimoponto - primeiroponto do poligono2
-                intersectionsL[c] = (polygon1.Vertices[i],polygon1.Vertices[i+1], polygon2.Vertices[len(polygon2.Vertices)-1], polygon2.Vertices[0])
+        if(hasIntersection(polygon1.Vertices[i],polygon1.Vertices[i + 1], polygon2.Vertices[len(polygon2.Vertices) - 1], polygon2.Vertices[0])):        # verifica apenas ultimoponto - primeiroponto do poligono2
+                intersectionsL[c] = (polygon1.Vertices[i],polygon1.Vertices[i + 1], polygon2.Vertices[len(polygon2.Vertices)- 1], polygon2.Vertices[0])
                 c+=1
-    i1 = polygon1.Vertices[len(polygon1.Vertices)-1]
+    i1 = polygon1.Vertices[len(polygon1.Vertices) - 1]
     i2 = polygon1.Vertices[0]
-    for j in range(0, len(polygon2.Vertices)-2):
-            if(hasIntersection(i2, i1, polygon2.Vertices[j], polygon2.Vertices[j+1])):        #verifica intersecao com todas arestas exceto ultimoponto - primeiroponto do poligono2
-                intersectionsL[c] = (i2, i1, polygon2.Vertices[j], polygon2.Vertices[j+1])
+    for j in range(0, len(polygon2.Vertices) - 2):
+            if(hasIntersection(i2, i1, polygon2.Vertices[j], polygon2.Vertices[j + 1])):        #verifica intersecao com todas arestas exceto ultimoponto - primeiroponto do poligono2
+                intersectionsL[c] = (i2, i1, polygon2.Vertices[j], polygon2.Vertices[j + 1])
                 c+=1
-    if(hasIntersection(i2, i1, polygon2.Vertices[len(polygon2.Vertices)-1], polygon2.Vertices[0])):        # verifica apenas ultimoponto - primeiroponto do poligono2
-                intersectionsL[c] = (i2, i1, polygon2.Vertices[len(polygon2.Vertices)-1], polygon2.Vertices[0])
+    if(hasIntersection(i2, i1, polygon2.Vertices[len(polygon2.Vertices) - 1], polygon2.Vertices[0])):        # verifica apenas ultimoponto - primeiroponto do poligono2
+                intersectionsL[c] = (i2, i1, polygon2.Vertices[len(polygon2.Vertices)- 1], polygon2.Vertices[0])
                 c+=1
     return intersectionsL
 
