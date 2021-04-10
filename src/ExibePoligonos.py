@@ -52,8 +52,8 @@ def reshape(w,h):
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
     # Cria uma folga na Janela de Seleção, com 10% das dimensões do polígono
-    BordaX = abs(Max.x-Min.x)*0.1
-    BordaY = abs(Max.y-Min.y)*0.1
+    BordaX = abs(Max.x-Min.x) * 0.1
+    BordaY = abs(Max.y-Min.y) * 0.1
     #glOrtho(Min.x-BordaX, Max.x+BordaX, Min.y-BordaY, Max.y+BordaY, 0.0, 1.0)
     glOrtho(Min.x, Max.x, Min.y, Max.y, 0.0, 1.0)
     glMatrixMode (GL_MODELVIEW)
@@ -116,8 +116,8 @@ def display():
     glScalef(0.33, 0.5, 1)
     glLineWidth(2)
     glColor3f(1,1,0) # R, G, B  [0..1]
-    Intersecao = interseccao(A, B)
-    Intersecao.desenhaPoligono()
+    ##Intersecao = interseccao(A, B)
+    ##Intersecao.desenhaPoligono()
     glPopMatrix()
     
     # Desenha o polígono B no meio, abaixo
@@ -136,7 +136,7 @@ def display():
     glScalef(0.33, 0.5, 1)
     glLineWidth(2)
     glColor3f(1,0,0) # R, G, B  [0..1]
-    Diferencab = diferenca2(B, A)
+    Diferencab = diferenca(B, A)
     Diferencab.desenhaPoligono()
     glPopMatrix()
 
@@ -215,7 +215,7 @@ def init():
     
     LePontosDeArquivo("txts/Retangulo.txt", A)
     Min, Max = A.getLimits()
-    LePontosDeArquivo("txts/Quadrado.txt", B)
+    LePontosDeArquivo("txts/Retangulo2.txt", B)
     MinAux, MaxAux = B.getLimits()
     # Atualiza os limites globais após cada leitura
     Min = ObtemMinimo(Min, MinAux)
@@ -231,12 +231,12 @@ def init():
     Terco.multiplica(fator, fator, fator)
     
     #Calcula 1/2 da largura da janela
-    Meio.x = (Max.x+Min.x)/2
-    Meio.y = (Max.y+Min.y)/2
-    Meio.z = (Max.z+Min.z)/2
+    Meio.x = (Max.x + Min.x)/2
+    Meio.y = (Max.y + Min.y)/2
+    Meio.z = (Max.z + Min.z)/2
 
-    V1 = Point(1,0,0)
-    V2 = Point(0,1,0)
+    V1 = Point(1, 0, 0)
+    V2 = Point(0, 1, 0)
     V3 = Point()
     
     ProdVetorial(V1, V2, V3)
@@ -256,7 +256,7 @@ def hasIntersection(p1, p2, p3, p4):
     s,t = -1, -1
     ret = intersec2d( p1,  p2,  p3,  p4)
     if (not ret): return False
-    if (s>=0.0 and s <=1.0 and t>=0.0 and t<=1.0):
+    if (s >= 0.0 and s <= 1.0 and t >= 0.0 and t <= 1.0):
         return True
     else: return False
 
@@ -444,6 +444,17 @@ def uniao(polygon1: Polygon, polygon2: Polygon):
     arestas1 = classificaArestas(polygon1, polygon2)
     arestas2 = classificaArestas(polygon2, polygon1)
 
+    isUniao = False
+
+    for i in range(0, len(arestas1)):
+        if arestas1[i][2] == False:
+            isUniao = True
+            break
+    
+    if not isUniao:
+        print("Nao ha uniao entre os poligonos passados nos parametros")
+        return polygon1
+
     uniaoAux = []
     for i in range(0, len(arestas1)):
         if arestas1[i][2]:
@@ -457,7 +468,7 @@ def uniao(polygon1: Polygon, polygon2: Polygon):
     pFinal = uniaoAux[0][1]
     uniaoFinal.insereVertice(pInit.x, pInit.y, pInit.z)
     uniaoFinal.insereVertice(pFinal.x, pFinal.y, pFinal.z)
-    c=1
+    c = 1
 
     while not pInit.isEqual(pFinal):
         if((uniaoAux[c][0].x == pFinal.x) and (uniaoAux[c][0].y == pFinal.y)):
@@ -473,6 +484,17 @@ def uniao(polygon1: Polygon, polygon2: Polygon):
 def interseccao(polygon1: Polygon, polygon2: Polygon):
     arestas1 = classificaArestas(polygon1, polygon2)
     arestas2 = classificaArestas(polygon2, polygon1)
+
+    isUniao = False
+
+    for i in range(0, len(arestas1)):
+        if arestas1[i][2] == False:
+            isUniao = True
+            break
+    
+    if not isUniao:
+        print("Nao ha interseccao entre os poligonos passados nos parametros")
+        return polygon1
 
     intersectaux = []
     for i in range(0, len(arestas1)):
@@ -503,35 +525,16 @@ def diferenca(polygon1: Polygon, polygon2: Polygon):
     arestas1 = classificaArestas(polygon1, polygon2)
     arestas2 = classificaArestas(polygon2, polygon1)
 
-    diffAux = []
+    isUniao = False
+
     for i in range(0, len(arestas1)):
-        if arestas1[i][2]:
-            diffAux.append(arestas1[i])
-    for i in range(0, len(arestas2)):
-        if not arestas2[i][2]:
-            diffAux.append(arestas2[i])
-
-    diffFinal = Polygon()
-    pInit = diffAux[0][0]
-    pFinal = diffAux[0][1]
-    diffFinal.insereVertice(pInit.x, pInit.y, pInit.z)
-    diffFinal.insereVertice(pFinal.x, pFinal.y, pFinal.z)
-    c = 1
-
-    while (len(diffAux) != len(diffFinal.Vertices)):
-        if((diffAux[c][0].x == pFinal.x) and (diffAux[c][0].y == pFinal.y)):
-            pFinal = diffAux[c][1]
-            if not pInit.isEqual(pFinal):
-                diffFinal.insereVertice(pFinal.x, pFinal.y, pFinal.z)
-        c += 1
-        if c == len(diffAux):
-            c = 1
-
-    return diffFinal
-
-def diferenca2(polygon1: Polygon, polygon2: Polygon):
-    arestas1 = classificaArestas(polygon1, polygon2)
-    arestas2 = classificaArestas(polygon2, polygon1)
+        if arestas1[i][2] == False:
+            isUniao = True
+            break
+    
+    if not isUniao:
+        print("Nao ha uniao entre os poligonos passados nos parametros")
+        return polygon1
 
     diffAux = []
     for i in range(0, len(arestas1)):
