@@ -12,6 +12,8 @@
 #   http://pyopengl.sourceforge.net/documentation/manual-3.0/index.html#GLUT
 # ***********************************************************************************
 
+import os
+import os.path
 from OpenGL.GL import *
 from OpenGL.GLUT import *
 from OpenGL.GLU import *
@@ -118,6 +120,8 @@ def display():
     Uniao = uniao(A, B)
     Uniao.desenhaPoligono()
     glPopMatrix()
+    createFilePolygon(Uniao, "Uniao", False)
+
 
     # Desenha o polígono A no canto inferior esquerdo
     glPushMatrix()
@@ -128,6 +132,7 @@ def display():
     Intersecao = interseccao(A, B)
     Intersecao.desenhaPoligono()
     glPopMatrix()
+    createFilePolygon(Intersecao, "Interseccao", False)
 
     # Desenha o polígono B no meio, abaixo
     glPushMatrix()
@@ -135,9 +140,10 @@ def display():
     glScalef(0.33, 0.5, 1)
     glLineWidth(2)
     glColor3f(1, 0, 0)  # R, G, B  [0..1]
-    # Diferencaa = diferenca(A, B)
-    # Diferencaa.desenhaPoligono()
+    Diferencaa = diferenca(A, B)
+    Diferencaa.desenhaPoligono()
     glPopMatrix()
+    createFilePolygon(Diferencaa, "Diferenca", False)
 
     # Desenha o polígono B no meio, abaixo
     glPushMatrix()
@@ -145,10 +151,10 @@ def display():
     glScalef(0.33, 0.5, 1)
     glLineWidth(2)
     glColor3f(1, 0, 0)  # R, G, B  [0..1]
-    # Diferencab = diferenca(B, A)
-    # Diferencab.desenhaPoligono()
+    Diferencab = diferenca(B, A)
+    Diferencab.desenhaPoligono()
     glPopMatrix()
-
+    createFilePolygon(Diferencab, "Diferenca", True)
     glutSwapBuffers()
 
 
@@ -227,11 +233,17 @@ def ObtemMinimo(P1, P2):
 
 def init():
     # Variáveis usadas para definir os limites da Window
-    global Min, Max, Meio, Terco, Largura
+    global Min, Max, Meio, Terco, Largura, arquivoUm, arquivoDois
 
-    LePontosDeArquivo("txts/Retangulo2.txt", A)
+    arquivoUm = "Retangulo"
+    arquivoDois = "Retangulo2"
+
+    entradaAquivoUm = "txts/" + arquivoUm + ".txt" 
+    entradaAquivoDois = "txts/" + arquivoDois + ".txt" 
+
+    LePontosDeArquivo(entradaAquivoUm, A)
     Min, Max = A.getLimits()
-    LePontosDeArquivo("txts/Retangulo.txt", B)
+    LePontosDeArquivo(entradaAquivoDois, B)
     MinAux, MaxAux = B.getLimits()
     # Atualiza os limites globais após cada leitura
     Min = ObtemMinimo(Min, MinAux)
@@ -406,7 +418,9 @@ def classificaArestas(polygon1: Polygon, polygon2: Polygon):
     arestas = []
     global vAuxAdd
     global isOut
+    
     isOut = not isInside(polygon2, polygon1.Vertices[0])  # arestas FORA = True
+    
     for i in range(0, len(polygon1.Vertices) - 1):
         a = polygon1.Vertices[i]
         b = polygon1.Vertices[i + 1]
@@ -427,8 +441,10 @@ def classificaArestas(polygon1: Polygon, polygon2: Polygon):
                     else:
                         arestas.append((ip, b, isOut))
                     add = False
+        
         c = polygon2.Vertices[len(polygon2.Vertices) - 1]
         d = polygon2.Vertices[0]
+        
         if(hasIntersection(a, b, c, d)):
             if(add):
                 ip = intersectionPoint(a, b, c, d)
@@ -443,26 +459,31 @@ def classificaArestas(polygon1: Polygon, polygon2: Polygon):
                 add = False
         if(add):
             arestas.append((a, b, isOut))
+    
     a = polygon1.Vertices[len(polygon1.Vertices) - 1]
     b = polygon1.Vertices[0]
     add = True
+    
     for j in range(0, len(polygon2.Vertices) - 1):
         c = polygon2.Vertices[j]
         d = polygon2.Vertices[j+1]
+        
         if(hasIntersection(a, b, c, d)):
             if(add):
                 ip = intersectionPoint(a, b, c, d)
-                arestas.append((ip, b, isOut))
+                arestas.append((a, ip, isOut))
                 isOut = not isOut
                 auxArestasVetor = auxArestas((a, ip, isOut), c, d, polygon2)
-                if(vAuxAdd):  # talvez tenha q fazer for
+                if(vAuxAdd):  # talvez tenha q fazer for #################################### AQUI
                     for i in auxArestasVetor:
                         arestas.append(i)
                 else:
                     arestas.append((ip, b, isOut))
                 add = False
+    
     c = polygon2.Vertices[len(polygon2.Vertices) - 1]
     d = polygon2.Vertices[0]
+    
     if(hasIntersection(a, b, c, d)):
         if(add):
             ip = intersectionPoint(a, b, c, d)
@@ -477,6 +498,7 @@ def classificaArestas(polygon1: Polygon, polygon2: Polygon):
             add = False
     if(add):
         arestas.append((a, b, isOut))
+    
     return arestas
 
 
@@ -621,6 +643,31 @@ def diferenca(polygon1: Polygon, polygon2: Polygon):
 
     return diffFinal
 
+
+def createFilePolygon(polygon1: Polygon, fileName, diffBA):
+    write =  ""
+    cont = 0
+    while cont < polygon1.getNVertices():
+        write += "\n"
+        write += str(int(polygon1.Vertices[cont].x)) + " " + str(int(polygon1.Vertices[cont].y))
+        cont += 1  
+    
+    if diffBA:
+        filename = arquivoDois + fileName + arquivoUm
+    else:
+        filename = arquivoUm + fileName + arquivoDois
+
+    ##filename = filename 
+    filepath = "results/" + filename + ".txt"
+
+    if os.path.isfile(filepath):
+        os.remove(filepath)
+       
+    f = open(filepath, "x")
+    f.write(str(cont))
+    f.write(write)
+    f.close()
+
 # ***********************************************************************************
 # Programa Principal
 # ***********************************************************************************
@@ -636,6 +683,7 @@ glutDisplayFunc(display)
 # glutIdleFunc(showScreen)
 glutReshapeFunc(reshape)
 glutKeyboardFunc(keyboard)
+
 
 try:
     glutMainLoop()
