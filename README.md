@@ -1,6 +1,6 @@
 # PolygonsPython
 
-T1 Computação Gráfica 5º semestre PUC-RS
+T1 Computação Gráfica 5º semestre PUC-RS 2021/1
 
 Neste trablhamos nós implementamos 4 operações em cima de 2 polígonos, união, intersecção e as duas possíveis diferenças. O programa tanto exibe essas operções de forma gráfica como também gera um .txt de saída com os vértices dos novos polígonos criados dentro do diretório /results.
 
