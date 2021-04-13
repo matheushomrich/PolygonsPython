@@ -1,15 +1,6 @@
 # ***********************************************************************************
-#   ExibePoligonos.py
-#       Autor: Márcio Sarroglia Pinho
-#       pinho@pucrs.br
-#   Este programa exibe um polígono em OpenGL
-#   Para construir este programa, foi utilizada a biblioteca PyOpenGL, disponível em
-#   http://pyopengl.sourceforge.net/documentation/index.html
-#
-#   Sugere-se consultar também as páginas listadas
-#   a seguir:
-#   http://bazaar.launchpad.net/~mcfletch/pyopengl-demo/trunk/view/head:/PyOpenGL-Demo/NeHe/lesson1.py
-#   http://pyopengl.sourceforge.net/documentation/manual-3.0/index.html#GLUT
+#   Authors: Matheus Homrich and Thiago Mello
+#   GitHub: https://github.com/matheushomrich/PolygonsPython
 # ***********************************************************************************
 
 import os
@@ -235,8 +226,8 @@ def init():
     # Variáveis usadas para definir os limites da Window
     global Min, Max, Meio, Terco, Largura, arquivoUm, arquivoDois
 
-    arquivoUm = "Retangulo"
-    arquivoDois = "Retangulo2"
+    arquivoUm = "Triangulo"
+    arquivoDois = "Retangulo"
 
     entradaAquivoUm = "txts/" + arquivoUm + ".txt" 
     entradaAquivoDois = "txts/" + arquivoDois + ".txt" 
@@ -273,7 +264,7 @@ def init():
 
 
 # ***********************************************************************************
-# Programa Principal
+# Main Program
 # ***********************************************************************************
 
 s, t = -1, -1
@@ -306,6 +297,9 @@ def intersec2d(p1, p2, p3, p4):
 
     return True  # h� intersec��o
 
+# ***********************************************************************************
+# Operations
+# ***********************************************************************************
 
 def intersectionPoint(a1: Point, a2: Point, b1: Point, b2: Point):
 
@@ -360,7 +354,6 @@ def intersections(polygon1: Polygon, polygon2: Polygon):
 isOut = True
 vAuxAdd = False
 
-
 def auxArestas(aresta, c, d, polygon):
     global isOut
     auxArestasV = []
@@ -396,8 +389,6 @@ def auxArestas(aresta, c, d, polygon):
             auxArestasV.append((ip, aresta[1], isOut))
         vAuxAdd = True
     return auxArestasV
-
-# usar essa implementacao de for pro classificaAresta se houver tempo
 
 
 def isInside(poly: Polygon, point: Point):
