@@ -226,8 +226,8 @@ def init():
     # Variáveis usadas para definir os limites da Window
     global Min, Max, Meio, Terco, Largura, arquivoUm, arquivoDois
 
-    arquivoUm = "Triangulo"
-    arquivoDois = "Retangulo"
+    arquivoUm = "Retangulo"
+    arquivoDois = "Retangulo2"
 
     entradaAquivoUm = "txts/" + arquivoUm + ".txt" 
     entradaAquivoDois = "txts/" + arquivoDois + ".txt" 
@@ -588,7 +588,7 @@ def diferenca(polygon1: Polygon, polygon2: Polygon):
             break
 
     if not isUniao:
-        print("Nao ha uniao entre os poligonos passados nos parametros")
+        print("Nao ha diferenca entre os poligonos passados nos parametros")
         return polygon1
 
     diffAux = []
