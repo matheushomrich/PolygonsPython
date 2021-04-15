@@ -226,8 +226,8 @@ def init():
     # Variáveis usadas para definir os limites da Window
     global Min, Max, Meio, Terco, Largura, arquivoUm, arquivoDois
 
-    arquivoUm = "Retangulo"
-    arquivoDois = "Retangulo2"
+    arquivoUm = "Objeto1"
+    arquivoDois = "Objeto2"
 
     entradaAquivoUm = "txts/" + arquivoUm + ".txt" 
     entradaAquivoDois = "txts/" + arquivoDois + ".txt" 
